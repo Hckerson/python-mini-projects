@@ -1,19 +1,31 @@
-# pip install psutil
+# Install dependencies:
+# pip install psutil plyer
+
 import psutil
+from plyer import notification
 
-battery = psutil.sensors_battery()
-plugged = battery.power_plugged
-percent = battery.percent
+def check_battery():
+    battery = psutil.sensors_battery()
+    
+    if battery is None:
+        print("Could not retrieve battery information.")
+        return
 
-if percent <= 30 and plugged!=True:
- 
-    # pip install py-notifier
-    # pip install win10toast
-    from pynotifier import Notification
+    percent = battery.percent
+    plugged = battery.power_plugged
 
-    Notification(
-        title="Battery Low",
-        description=str(percent) + "% Battery remain!!",
-        duration=5,  # Duration in seconds
-        
-    ).send()
+    if percent <= 90 and not plugged:
+        notify_low_battery(percent)
+
+def notify_low_battery(percent):
+    try:
+        notification.notify(
+            title="Battery Low",
+            message=f"{percent}% Battery remaining!",
+            timeout=5  # Notification disappears after 5 seconds
+        )
+    except Exception as e:
+        print(f"Notification failed: {e}")
+
+if __name__ == "__main__":
+    check_battery()
